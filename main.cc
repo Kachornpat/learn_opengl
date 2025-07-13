@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "shader.hh"
+#include "stb_image.h"
 
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -67,6 +68,12 @@ int main() {
     std::cout << "Maximum ar of vertex attributes supported: " << nrAttributes
         << std::endl;
 
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
     Shader ourShader("shader/shader.vs", "shader/shader.fs");
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
