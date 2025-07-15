@@ -71,11 +71,11 @@ int main() {
         << std::endl;
 
 
-    unsigned int texture[2];
-    glGenTextures(2, texture);
+    unsigned int textures[2];
+    glGenTextures(2, textures);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -83,8 +83,8 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
-    // unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+    // unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
 
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -95,16 +95,16 @@ int main() {
     }
     stbi_image_free(data);
 
-    glBindTexture(GL_TEXTURE_2D, texture[1]);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    data = stbi_load("C:/git/learn_opengl/awesomeface.png", &width, &height, &nrChannels, 0);
-    // unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
 
+    stbi_set_flip_vertically_on_load(true);
+    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else {
@@ -112,10 +112,8 @@ int main() {
     }
     stbi_image_free(data);
 
-
-
-    Shader ourShader("C:/git/learn_opengl/shader/shader.vs", "C:/git/learn_opengl/shader/shader.fs");
-    // Shader ourShader("shader/shader.vs", "shader/shader.fs");
+    Shader ourShader("shader/shader.vs", "shader/shader.fs");
+    
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
         processInput(window);
@@ -125,9 +123,12 @@ int main() {
 
         ourShader.use();
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture[1]);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture[1]);
+        glBindTexture(GL_TEXTURE_2D, textures[1]);
+
+        ourShader.setInt("texture1", 0);
+        ourShader.setInt("texture2", 1);
 
         glBindVertexArray(VAO);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -136,6 +137,12 @@ int main() {
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteTextures(2, textures);
+
     glfwTerminate();
     return 0;
 
