@@ -86,7 +86,7 @@ int main() {
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
-    // unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
+    //unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
     unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
 
     if (data) {
@@ -106,8 +106,8 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_set_flip_vertically_on_load(true);
-    //data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
-    data = stbi_load("C:/git/learn_opengl/awesomeface.png", &width, &height, &nrChannels, 0);
+    //data = stbi_load("C:/git/learn_opengl/awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -117,7 +117,7 @@ int main() {
     }
     stbi_image_free(data);
 
-    // Shader ourShader("C:/git/learn_opengl/shader/shader.vs", "C:/git/learn_opengl/shader/shader.fs");
+    //Shader ourShader("C:/git/learn_opengl/shader/shader.vs", "C:/git/learn_opengl/shader/shader.fs");
     Shader ourShader("shader/shader.vs", "shader/shader.fs");
 
     glm::mat4 model = glm::mat4(1.0f);
