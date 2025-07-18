@@ -83,11 +83,6 @@ int main() {
 
     };
 
-    // unsigned int indices[] = {
-    //     0, 1, 3,
-    //     1, 2, 3
-    // };
-
     unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -95,10 +90,6 @@ int main() {
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // glGenBuffers(1, &EBO);
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
@@ -173,7 +164,6 @@ int main() {
     glm::mat4 projection = glm::mat4(1.0f);
     unsigned int projectionLoc = glGetUniformLocation(ourShader.ID, "projection");
 
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     while(!glfwWindowShouldClose(window)){
         processInput(window);
 
@@ -182,10 +172,6 @@ int main() {
 
         ourShader.setInt("texture1", 0);
         ourShader.setInt("texture2", 1);
-
-        //model = glm::mat4(1.0f);
-        //model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-        //glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         view = glm::mat4(1.0f);
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
@@ -197,8 +183,6 @@ int main() {
 
         ourShader.use();
         glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT,  0);
 
         for (unsigned int i = 0; i < 10; i++) {
             model = glm::mat4(1.0f);
