@@ -14,6 +14,13 @@
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
 int main() {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -97,11 +104,6 @@ int main() {
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    int nrAttributes;
-    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-    std::cout << "Maximum ar of vertex attributes supported: " << nrAttributes
-        << std::endl;
-
     unsigned int textures[2];
     glGenTextures(2, textures);
 
@@ -158,13 +160,18 @@ int main() {
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 view;
     unsigned int viewLoc = glGetUniformLocation(ourShader.ID, "view");
     
     glm::mat4 projection = glm::mat4(1.0f);
     unsigned int projectionLoc = glGetUniformLocation(ourShader.ID, "projection");
 
     while(!glfwWindowShouldClose(window)){
+
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -173,8 +180,7 @@ int main() {
         ourShader.setInt("texture1", 0);
         ourShader.setInt("texture2", 1);
 
-        view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
         projection = glm::mat4(1.0f);
@@ -214,4 +220,15 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height){
 void processInput(GLFWwindow *window){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    const float cameraSpeed = 2.5f * deltaTime;
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraFront;
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraFront;
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+
 }
