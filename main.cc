@@ -154,8 +154,8 @@ int main() {
     }
     stbi_image_free(data);
 
-    Shader ourShader("C:/git/learn_opengl/shader/shader.vs", "C:/git/learn_opengl/shader/shader.fs");
-    //Shader ourShader("shader/shader.vs", "shader/shader.fs");
+    Shader ourShader("C:/git/learn_opengl/shader/vertex.glsl", "C:/git/learn_opengl/shader/fragment.glsl");
+    //Shader ourShader("shader/vertex.glsl", "shader/fragment.glsl");
 
     glm::mat4 model = glm::mat4(1.0f);
     unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
