@@ -178,12 +178,22 @@ int main() {
     glm::mat4 projection = glm::mat4(1.0f);
     unsigned int projectionLoc = glGetUniformLocation(ourShader.ID, "projection");
 
-    while(!glfwWindowShouldClose(window)){
+    int currentSec = 0;
+    int countFrame = 0;
+
+    while (!glfwWindowShouldClose(window)) {
 
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
+        countFrame++;
+        if (currentSec != (int)currentFrame)
+        {
+            std::cout << countFrame << " FPS \r";
+            currentSec = (int)currentFrame;
+            countFrame = 0;
+        }
+        
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
