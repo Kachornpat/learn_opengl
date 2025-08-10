@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shader.hh"
+#include "camera.hh"
 #include "stb_image.h"
 
 
@@ -123,8 +124,8 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, textures[0]);
 
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
-    //unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+    // unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
 
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -143,8 +144,8 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("C:/git/learn_opengl/awesomeface.png", &width, &height, &nrChannels, 0);
-    //data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+    // data = stbi_load("C:/git/learn_opengl/awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -154,8 +155,8 @@ int main() {
     }
     stbi_image_free(data);
 
-    Shader ourShader("C:/git/learn_opengl/shader/vertex.glsl", "C:/git/learn_opengl/shader/fragment.glsl");
-    //Shader ourShader("shader/vertex.glsl", "shader/fragment.glsl");
+    // Shader ourShader("C:/git/learn_opengl/shader/vertex.glsl", "C:/git/learn_opengl/shader/fragment.glsl");
+    Shader ourShader("shader/vertex.glsl", "shader/fragment.glsl");
 
     glm::mat4 model = glm::mat4(1.0f);
     unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
@@ -180,6 +181,8 @@ int main() {
 
     int currentSec = 0;
     int countFrame = 0;
+    
+    Camera ourCamera(ourShader.ID);
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -187,14 +190,16 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         countFrame++;
+        
         if (currentSec != (int)currentFrame)
         {
-            std::cout << countFrame << " FPS \r";
+            std::cout << countFrame << " FPS" << std::endl;
             currentSec = (int)currentFrame;
             countFrame = 0;
         }
         
         processInput(window);
+        ourCamera.ProcessKeyboard(window, deltaTime);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -202,20 +207,19 @@ int main() {
         ourShader.setInt("texture1", 0);
         ourShader.setInt("texture2", 1);
 
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-        projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
+        ourCamera.use();
         ourShader.use();
         glBindVertexArray(VAO);
 
         for (unsigned int i = 0; i < 10; i++) {
             model = glm::mat4(1.0f);
+
+
+            // rotate * translate * vertexData
             model = glm::translate(model, cubePosition[i]);
-            model = glm::rotate(model, (float) glfwGetTime(), glm::vec3(1.0f, 0.f, 0.5f));
+            if (i % 3 == 0)
+                model = glm::rotate(model, (float) glfwGetTime(), glm::vec3(1.0f, 0.f, 0.5f));
+            
             float angle = 20.0f * i;
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -237,22 +241,6 @@ int main() {
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height){
     glViewport(0, 0, width, height);
-}
-
-void processInput(GLFWwindow *window){
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-
-    const float cameraSpeed = 1.5f * deltaTime;
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraFront;
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

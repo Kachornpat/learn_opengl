@@ -21,21 +21,29 @@ class Camera
 	public:
 		glm::vec3 Position;
 		glm::vec3 Front;
+		glm::vec3 Up;
 
 		float Yaw;
 		float Pitch;
+
+		float Fov;
+
 		float MovementSpeed;
 		float MouseSensitivity;
 		float Zoom;
 
-		Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch);
+
+		Camera(unsigned int shaderID);
 
 		glm::mat4 GetViewMatrix();
-		void ProcessKeyboard(Camera_Movement direction, float deltaTime);
+		void use();
+		void ProcessKeyboard(GLFWwindow *window, float deltaTime);
 		void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constraintPitch = true);
 		void ProcessMouseScroll(float yoffset);
 
 	private:
+		unsigned int viewLoc;
+		unsigned int projectionLoc;
 		void updateCameraVectors();
 };
 #endif
