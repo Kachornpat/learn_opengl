@@ -23,10 +23,6 @@ class Camera
 		glm::vec3 Front;
 		glm::vec3 Up;
 
-		float Yaw;
-		float Pitch;
-
-		float Fov;
 
 		float MovementSpeed;
 		float MouseSensitivity;
@@ -34,16 +30,20 @@ class Camera
 
 
 		Camera(unsigned int shaderID);
-
-		glm::mat4 GetViewMatrix();
 		void use();
-		void ProcessKeyboard(GLFWwindow *window, float deltaTime);
-		void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constraintPitch = true);
-		void ProcessMouseScroll(float yoffset);
+		void updateView(float yoffset, float xoffset);
+		void updateFov(float yoffset);
 
 	private:
+
+		float Yaw;
+		float Pitch;
+
+		float Fov;
+
+		unsigned int shaderID;
 		unsigned int viewLoc;
 		unsigned int projectionLoc;
-		void updateCameraVectors();
+
 };
 #endif

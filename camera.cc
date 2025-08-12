@@ -23,13 +23,15 @@ Camera::Camera(unsigned int shaderID) :
 	Fov(45.0f)
 {
 
-    viewLoc = glGetUniformLocation(shaderID, "view");
-    projectionLoc = glGetUniformLocation(shaderID, "projection");
+	this->shaderID = shaderID;
 
-	Camera::use();
 }
 
-void Camera::use(){
+void Camera::use() {
+
+	viewLoc = glGetUniformLocation(shaderID, "view");
+	projectionLoc = glGetUniformLocation(shaderID, "projection");
+
 	glm::mat4 view = glm::lookAt(Position, Position + Front, Up);
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
@@ -38,18 +40,29 @@ void Camera::use(){
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 }
 
-void Camera::ProcessKeyboard(GLFWwindow *window, float deltaTime){
-	if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+void Camera::updateView(float yoffset, float xoffset) {
+	Pitch -= yoffset;
+	Yaw += xoffset;
 
-    const float cameraSpeed = 1.5f * deltaTime;
-    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        Position += cameraSpeed * Front;
-    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        Position -= cameraSpeed * Front;
-    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        Position -= glm::normalize(glm::cross(Front, Up)) * cameraSpeed;
-    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        Position += glm::normalize(glm::cross(Front, Up)) * cameraSpeed;
+	if (Pitch > 89.0f)
+		Pitch = 89.0f;
+	if (Pitch < -89.0f)
+		Pitch = -89.0f;
+
+	glm::vec3 direction;
+	direction.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	direction.y = sin(glm::radians(Pitch));
+	direction.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	Front = glm::normalize(direction);
 }
+
+void Camera::updateFov(float yoffset) {
+	Fov -= yoffset;
+	if (Fov < 1.0f)
+		Fov = 1.0f;
+	if (Fov > 45.0f)
+		Fov = 45.0f;
+}
+
+
 

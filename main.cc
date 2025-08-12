@@ -15,21 +15,14 @@
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void inputProcess(GLFWwindow* window, float deltaTime);
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+Camera ourCamera = NULL;
 
-float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 float lastX = 400, lastY = 800;
 
-float pitch = 0, yaw = -90.0f;
-
 bool firstMouse = true;
-
-float fov = 45.0f;
 
 int main() {
     glfwInit();
@@ -124,8 +117,7 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, textures[0]);
 
     int width, height, nrChannels;
-    // unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
-    unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
 
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -144,8 +136,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_set_flip_vertically_on_load(true);
-    // data = stbi_load("C:/git/learn_opengl/awesomeface.png", &width, &height, &nrChannels, 0);
-    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("C:/git/learn_opengl/awesomeface.png", &width, &height, &nrChannels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -155,8 +146,7 @@ int main() {
     }
     stbi_image_free(data);
 
-    // Shader ourShader("C:/git/learn_opengl/shader/vertex.glsl", "C:/git/learn_opengl/shader/fragment.glsl");
-    Shader ourShader("shader/vertex.glsl", "shader/fragment.glsl");
+    Shader ourShader("C:/git/learn_opengl/shader/vertex.glsl", "C:/git/learn_opengl/shader/fragment.glsl");
 
     glm::mat4 model = glm::mat4(1.0f);
     unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
@@ -182,12 +172,12 @@ int main() {
     int currentSec = 0;
     int countFrame = 0;
     
-    Camera ourCamera(ourShader.ID);
+    ourCamera = Camera(ourShader.ID);
 
     while (!glfwWindowShouldClose(window)) {
 
         float currentFrame = glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
+        float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         countFrame++;
         
@@ -198,8 +188,7 @@ int main() {
             countFrame = 0;
         }
         
-        processInput(window);
-        ourCamera.ProcessKeyboard(window, deltaTime);
+        inputProcess(window, deltaTime);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -239,6 +228,21 @@ int main() {
 
 }
 
+void inputProcess(GLFWwindow *window, float deltaTime) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
+
+    const float cameraSpeed = 1.5f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        ourCamera.Position += cameraSpeed * ourCamera.Front;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        ourCamera.Position -= cameraSpeed * ourCamera.Front;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        ourCamera.Position -= glm::normalize(glm::cross(ourCamera.Front, ourCamera.Up)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        ourCamera.Position += glm::normalize(glm::cross(ourCamera.Front, ourCamera.Up)) * cameraSpeed;
+}
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height){
     glViewport(0, 0, width, height);
 }
@@ -261,26 +265,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
-    pitch -= yoffset;
-    yaw += xoffset;
-
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
-
-    glm::vec3 direction;
-    direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    direction.y = sin(glm::radians(pitch));
-    direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(direction);
+    ourCamera.updateView(yoffset, xoffset);
 
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    fov -= (float) yoffset;
-    if (fov < 1.0f)
-        fov = 1.0f;
-    if (fov > 45.0f)
-        fov = 45.0f;
+    ourCamera.updateFov((float) yoffset);
 }
