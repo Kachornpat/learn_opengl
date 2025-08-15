@@ -27,10 +27,11 @@ class Camera
 		float MovementSpeed;
 		float MouseSensitivity;
 		float Zoom;
+		float Fov;
 
 
-		Camera(unsigned int shaderID);
-		void use();
+		Camera();
+		glm::mat4 getView() const;
 		void updateView(float yoffset, float xoffset);
 		void updateFov(float yoffset);
 
@@ -39,9 +40,7 @@ class Camera
 		float Yaw;
 		float Pitch;
 
-		float Fov;
 
-		unsigned int shaderID;
 		unsigned int viewLoc;
 		unsigned int projectionLoc;
 

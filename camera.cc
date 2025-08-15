@@ -11,7 +11,7 @@
 
 
 
-Camera::Camera(unsigned int shaderID) : 
+Camera::Camera() : 
 	Position(glm::vec3(0.0f, 0.0f, 3.0f)),
 	Up(glm::vec3(0.0f, 1.0f, 0.0f)),
 	Yaw(YAW),
@@ -20,25 +20,13 @@ Camera::Camera(unsigned int shaderID) :
 	MovementSpeed(SPEED),
 	MouseSensitivity(SENSITIVITY),
 	Zoom(ZOOM),
-	Fov(45.0f)
+	Fov(45.0f),
+	viewLoc(0),
+	projectionLoc(0)
 {
 
-	this->shaderID = shaderID;
-
 }
 
-void Camera::use() {
-
-	viewLoc = glGetUniformLocation(shaderID, "view");
-	projectionLoc = glGetUniformLocation(shaderID, "projection");
-
-	glm::mat4 view = glm::lookAt(Position, Position + Front, Up);
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(Fov), 800.0f / 600.0f, 0.1f, 100.0f);
-	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-}
 
 void Camera::updateView(float yoffset, float xoffset) {
 	Pitch -= yoffset;
@@ -64,5 +52,9 @@ void Camera::updateFov(float yoffset) {
 		Fov = 45.0f;
 }
 
+glm::mat4 Camera::getView() const
+{
+	return glm::lookAt(Position, Position + Front, Up);
+}
 
 

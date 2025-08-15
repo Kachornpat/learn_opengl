@@ -150,21 +150,28 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    unsigned int lightVAO, lightVBO;
+    unsigned int lightVAO, lightVBO, lightCubeVAO, lightCubeVBO ;
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
 
+    glGenBuffers(1, &lightVBO);
     glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_basic), vertices_basic, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
+
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
+
+    glGenBuffers(1, &lightCubeVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     unsigned int textures[2];
     glGenTextures(2, textures);
@@ -173,7 +180,7 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, textures[0]);
 
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("C:/git/learn_opengl/container.jpg", &width, &height, &nrChannels, 0);
 
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -192,7 +199,7 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("C:/git/learn_opengl/awesomeface.png", &width, &height, &nrChannels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -202,10 +209,14 @@ int main() {
     }
     stbi_image_free(data);
 
-    Shader ourShader("shader/vertex.glsl", "shader/fragment.glsl"); 
+    // Shader ourShader("C:/git/learn_opengl/shader/shader.vs", "C:/git/learn_opengl/shader/shader.fs"); 
+    Shader lightingShader("C:/git/learn_opengl/shader/lightShader.vs", "C:/git/learn_opengl/shader/lightShader.fs");
+    Shader lightCubeShader("C:/git/learn_opengl/shader/lightCube.vs", "C:/git/learn_opengl/shader/lightCube.fs");
+    ourCamera = new Camera();
 
-    glm::mat4 model = glm::mat4(1.0f);
-    unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
+    glm::mat4 model, view, projection;
+    unsigned int modelLoc, viewLoc, projectionLoc;
+   
     // glm::vec3 cubePosition[] = {
     //     glm::vec3( 0.0f,  0.0f,  0.0f),
     //     glm::vec3( 2.0f,  5.0f, -15.0f),
@@ -219,15 +230,12 @@ int main() {
     //     glm::vec3(-1.3f,  1.0f, -1.5f)
     // };
 
-
     int currentSec = 0;
     int countFrame = 0;
     
-    ourCamera = new Camera(ourShader.ID);
-
     while (!glfwWindowShouldClose(window)) {
 
-        float currentFrame = glfwGetTime();
+        float currentFrame = (float) glfwGetTime();
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         countFrame++;
@@ -244,16 +252,49 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        ourShader.setInt("texture1", 0);
-        ourShader.setInt("texture2", 1);
+        // ourShader.setInt("texture1", 0);
+        // ourShader.setInt("texture2", 1);
 
-        ourCamera->use();
-        ourShader.use();
-        glBindVertexArray(lightVAO);
+        // ourShader.use();
+	    
+        view = ourCamera->getView();
+        projection = glm::perspective(glm::radians(ourCamera->Fov), 800.0f / 600.0f, 0.1f, 100.0f);
+
+	    // draw container
+        lightingShader.use();
+        lightingShader.setVec3("objectColor", glm::vec3(1.0f, 0.1f, 0.31f));
+        lightingShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
-
+	    modelLoc = glGetUniformLocation(lightingShader.ID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+        viewLoc = glGetUniformLocation(lightingShader.ID, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+ 
+        projectionLoc = glGetUniformLocation(lightingShader.ID, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+	
+	    // draw light box
+        lightCubeShader.use(); 
+	    model = glm::mat4(1.0f);
+	    model = glm::translate(model, glm::vec3(2.0f, 0.5f, -3.5f));
+	    model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+	    modelLoc = glGetUniformLocation(lightCubeShader.ID, "model");
+	    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+        viewLoc = glGetUniformLocation(lightCubeShader.ID, "view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+        projectionLoc = glGetUniformLocation(lightCubeShader.ID, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+        glBindVertexArray(lightCubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // for (unsigned int i = 0; i < 10; i++) {
@@ -308,14 +349,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     if (firstMouse)
     {
-        lastX = xpos;
-        lastY = ypos;
+        lastX = (float) xpos;
+        lastY = (float) ypos;
         firstMouse = false;
     }
-    float xoffset = xpos - lastX;
-    float yoffset = ypos - lastY;
-    lastX = xpos;
-    lastY = ypos;
+    float xoffset = (float) xpos - lastX;
+    float yoffset = (float) ypos - lastY;
+    lastX = (float) xpos;
+    lastY = (float) ypos;
 
     const float sensitivity = 0.05f;
     xoffset *= sensitivity;
