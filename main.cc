@@ -21,7 +21,7 @@ Camera *ourCamera = NULL;
 
 float lastFrame = 0.0f;
 float lastX = 400, lastY = 800;
-
+float deltaTime = 0.0f;
 bool firstMouse = true;
 
 int main() {
@@ -153,26 +153,12 @@ int main() {
     // }
     // stbi_image_free(data);
 
-    // Shader ourShader("C:/git/learn_opengl/shader/shader.vs", "C:/git/learn_opengl/shader/shader.fs"); 
     Shader lightShader("shader/lightShader.vs", "shader/lightShader.fs");
     Shader cubeShader("shader/cubeShader.vs", "shader/cubeShader.fs");
     ourCamera = new Camera();
 
     glm::mat4 model, view, projection;
     unsigned int modelLoc, viewLoc, projectionLoc;
-   
-    // glm::vec3 cubePosition[] = {
-    //     glm::vec3( 0.0f,  0.0f,  0.0f),
-    //     glm::vec3( 2.0f,  5.0f, -15.0f),
-    //     glm::vec3(-1.5f, -2.2f, -2.5f),
-    //     glm::vec3(-3.8f, -2.0f, -12.3f),
-    //     glm::vec3( 2.4f, -0.4f, -3.5f),
-    //     glm::vec3(-1.7f,  3.0f, -7.5f),
-    //     glm::vec3( 1.3f, -2.0f, -2.5f),
-    //     glm::vec3( 1.5f,  2.0f, -2.50f),
-    //     glm::vec3( 1.5f,  0.2f, -1.5f),
-    //     glm::vec3(-1.3f,  1.0f, -1.5f)
-    // };
 
     int currentSec = 0;
     int countFrame = 0;
@@ -180,7 +166,7 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
 
         float currentFrame = (float) glfwGetTime();
-        float deltaTime = currentFrame - lastFrame;
+        deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
         countFrame++;
         
@@ -206,7 +192,7 @@ int main() {
 
         glm::vec3 lightPos(2.0f, 2.0f, -2.0f);
 
-	    // draw cube
+	// draw cube
         cubeShader.use();
         cubeShader.setVec3("lightPos", lightPos);
         cubeShader.setVec3("objectColor", glm::vec3(1.0f, 0.1f, 0.31f));
@@ -228,13 +214,13 @@ int main() {
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 	
-	    // draw light 
+	// draw light 
         lightShader.use(); 
-	    model = glm::mat4(1.0f);
-	    model = glm::translate(model, lightPos);
-	    model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
-	    modelLoc = glGetUniformLocation(lightShader.ID, "model");
-	    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, lightPos);
+	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+	modelLoc = glGetUniformLocation(lightShader.ID, "model");
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         viewLoc = glGetUniformLocation(lightShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -244,20 +230,6 @@ int main() {
 
         glBindVertexArray(lightVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        // for (unsigned int i = 0; i < 10; i++) {
-        //     model = glm::mat4(1.0f);
-
-
-        //     // rotate * translate * vertexData
-        //     model = glm::translate(model, cubePosition[i]);
-        //     if (i % 3 == 0)
-        //         model = glm::rotate(model, (float) glfwGetTime(), glm::vec3(1.0f, 0.f, 0.5f));
-            
-        //     float angle = 20.0f * i;
-        //     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        //     glDrawArrays(GL_TRIANGLES, 0, 36);
-        // }
         
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -315,7 +287,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = (float) xpos;
     lastY = (float) ypos;
 
-    const float sensitivity = 0.05f;
+    const float sensitivity = 0.1f * deltaTime;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
