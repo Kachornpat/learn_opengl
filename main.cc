@@ -159,24 +159,12 @@ int main() {
 
     glm::mat4 model, view, projection;
     unsigned int modelLoc, viewLoc, projectionLoc;
-
-    int currentSec = 0;
-    int countFrame = 0;
     
     while (!glfwWindowShouldClose(window)) {
+	float currentFrame = (float) glfwGetTime();
+	deltaTime = currentFrame - lastFrame;
+	lastFrame = currentFrame;
 
-        float currentFrame = (float) glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
-        countFrame++;
-        
-        if (currentSec != (int)currentFrame)
-        {
-            std::cout << countFrame << " FPS" << std::endl;
-            currentSec = (int)currentFrame;
-            countFrame = 0;
-        }
-        
         inputProcess(window, deltaTime);
 
         // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -194,14 +182,21 @@ int main() {
 
 	// draw cube
         cubeShader.use();
-        cubeShader.setVec3("lightPos", lightPos);
-        cubeShader.setVec3("objectColor", glm::vec3(1.0f, 0.1f, 0.31f));
-        cubeShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        cubeShader.setVec3("viewPos", ourCamera->Position);
+        cubeShader.setVec3("light.position", lightPos);
+	cubeShader.setVec3("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+	cubeShader.setVec3("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+	cubeShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+	cubeShader.setVec3("viewPos", ourCamera->Position);
+	
+	cubeShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+	cubeShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+	cubeShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+	cubeShader.setFloat("material.shininess", 32.0f);
+
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
-	    modelLoc = glGetUniformLocation(cubeShader.ID, "model");
+	modelLoc = glGetUniformLocation(cubeShader.ID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         viewLoc = glGetUniformLocation(cubeShader.ID, "view");
@@ -287,7 +282,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = (float) xpos;
     lastY = (float) ypos;
 
-    const float sensitivity = 0.1f * deltaTime;
+    const float sensitivity = 0.5f * deltaTime;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
