@@ -107,8 +107,10 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
     
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
@@ -117,41 +119,23 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // unsigned int textures[2];
-    // glGenTextures(2, textures);
+    unsigned int texture;
+    glGenTextures(1, &texture);
 
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, textures[0]);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-    // int width, height, nrChannels;
-    // unsigned char *data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load("container2.png", &width, &height, &nrChannels, 0);
 
-    // if (data) {
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    // }
-    // else {
-    //     std::cout << "Failed to load texture[0]" << std::endl;
-    // }
-    // stbi_image_free(data);
-
-    // glActiveTexture(GL_TEXTURE1);
-    // glBindTexture(GL_TEXTURE_2D, textures[1]);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // stbi_set_flip_vertically_on_load(true);
-    // data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
-    // if (data) {
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    // }
-    // else {
-    //     std::cout << "Failed to load texture[1]" << std::endl;
-    // }
-    // stbi_image_free(data);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        std::cout << "Failed to load texture(container2)" << std::endl;
+    }
+    stbi_image_free(data);
 
     Shader lightShader("shader/lightShader.vs", "shader/lightShader.fs");
     Shader cubeShader("shader/cubeShader.vs", "shader/cubeShader.fs");
@@ -161,50 +145,43 @@ int main() {
     unsigned int modelLoc, viewLoc, projectionLoc;
     
     while (!glfwWindowShouldClose(window)) {
-	float currentFrame = (float) glfwGetTime();
-	deltaTime = currentFrame - lastFrame;
-	lastFrame = currentFrame;
+        float currentFrame = (float) glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         inputProcess(window, deltaTime);
 
-        // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // ourShader.setInt("texture1", 0);
-        // ourShader.setInt("texture2", 1);
-
-        // ourShader.use();
-	    
+        cubeShader.setInt("material.diffuse", 0);
+        
         view = ourCamera->getView();
         projection = glm::perspective(glm::radians(ourCamera->Fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
-        glm::vec3 lightPos(2.0f, 2.0f, -2.0f);
+        glm::vec3 lightPos(1.0f, 2.0f, -4.0f);
 
-	// draw cube
+        // draw cube
         cubeShader.use();
         cubeShader.setVec3("light.position", lightPos);
-	
-	glm::vec3 lightColor;
-	lightColor.x = sin(glfwGetTime() * 2.0f);
-	lightColor.y = sin(glfwGetTime() * 0.5f);
-	lightColor.z = sin(glfwGetTime() * 1.3f);
-	glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-	glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+        
+        glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 
-	cubeShader.setVec3("light.ambient", ambientColor);
-	cubeShader.setVec3("light.diffuse", diffuseColor);
-	cubeShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-	cubeShader.setVec3("viewPos", ourCamera->Position);
-	
-	cubeShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-	cubeShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-	cubeShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-	cubeShader.setFloat("material.shininess", 32.0f);
+        cubeShader.setVec3("light.ambient", ambientColor);
+        cubeShader.setVec3("light.diffuse", diffuseColor);
+        cubeShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        cubeShader.setVec3("viewPos", ourCamera->Position);
+        
+        cubeShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        cubeShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        cubeShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+        cubeShader.setFloat("material.shininess", 32.0f);
 
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
-	modelLoc = glGetUniformLocation(cubeShader.ID, "model");
+	    modelLoc = glGetUniformLocation(cubeShader.ID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         viewLoc = glGetUniformLocation(cubeShader.ID, "view");
@@ -217,13 +194,13 @@ int main() {
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 	
-	// draw light 
+	    // draw light 
         lightShader.use(); 
-	model = glm::mat4(1.0f);
-	model = glm::translate(model, lightPos);
-	model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
-	modelLoc = glGetUniformLocation(lightShader.ID, "model");
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+        modelLoc = glGetUniformLocation(lightShader.ID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         viewLoc = glGetUniformLocation(lightShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
