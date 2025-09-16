@@ -148,7 +148,6 @@ int main() {
         float currentFrame = (float) glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
         inputProcess(window, deltaTime);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -181,7 +180,7 @@ int main() {
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
-	    modelLoc = glGetUniformLocation(cubeShader.ID, "model");
+	modelLoc = glGetUniformLocation(cubeShader.ID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         viewLoc = glGetUniformLocation(cubeShader.ID, "view");
@@ -194,7 +193,7 @@ int main() {
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 	
-	    // draw light 
+	// draw light 
         lightShader.use(); 
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
