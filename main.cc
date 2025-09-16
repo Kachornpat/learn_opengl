@@ -119,11 +119,11 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    unsigned int texture;
-    glGenTextures(1, &texture);
+    unsigned int textures[2];
+    glGenTextures(2, textures);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
 
     int width, height, nrChannels;
     unsigned char *data = stbi_load("container2.png", &width, &height, &nrChannels, 0);
@@ -137,11 +137,17 @@ int main() {
     }
 	stbi_image_free(data);
 
-    	data = stbi_load("container2_specular.png", &width, &height, &nrChannels, 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, textures[1]);
+    data = stbi_load("container2_specular.png", &width, &height, &nrChannels, 0);
 	if (data){
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	}
+    else {
+        std::cout << "Failed to load texture(container2_specular)" << std::endl;
+    }
+	stbi_image_free(data);
 
 
     Shader lightShader("shader/lightShader.vs", "shader/lightShader.fs");
@@ -160,6 +166,7 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         cubeShader.setInt("material.diffuse", 0);
+        cubeShader.setInt("material.specular", 1);
         
         view = ourCamera->getView();
         projection = glm::perspective(glm::radians(ourCamera->Fov), 800.0f / 600.0f, 0.1f, 100.0f);
@@ -179,15 +186,12 @@ int main() {
         cubeShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
         cubeShader.setVec3("viewPos", ourCamera->Position);
         
-        cubeShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-        cubeShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-        cubeShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
         cubeShader.setFloat("material.shininess", 32.0f);
 
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, -3.0f));
-	modelLoc = glGetUniformLocation(cubeShader.ID, "model");
+        modelLoc = glGetUniformLocation(cubeShader.ID, "model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         viewLoc = glGetUniformLocation(cubeShader.ID, "view");
@@ -224,8 +228,7 @@ int main() {
     glDeleteVertexArrays(1, &lightVAO);
     glDeleteVertexArrays(1, &cubeVAO);
     glDeleteBuffers(1, &cubeVBO);
-    // glDeleteBuffers(1, &lightEBO);
-    // glDeleteTextures(2, textures);
+    glDeleteTextures(2, textures);
 
     glfwTerminate();
     return 0;
