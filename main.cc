@@ -135,7 +135,14 @@ int main() {
     else {
         std::cout << "Failed to load texture(container2)" << std::endl;
     }
-    stbi_image_free(data);
+	stbi_image_free(data);
+
+    	data = stbi_load("container2_specular.png", &width, &height, &nrChannels, 0);
+	if (data){
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+
 
     Shader lightShader("shader/lightShader.vs", "shader/lightShader.fs");
     Shader cubeShader("shader/cubeShader.vs", "shader/cubeShader.fs");
