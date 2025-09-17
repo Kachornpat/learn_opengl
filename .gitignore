@@ -1,2 +1,7 @@
 main
 glad.c
+include
+lib
+.vscode
+glfw3.dll
+main.exe

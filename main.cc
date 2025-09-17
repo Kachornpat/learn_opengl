@@ -165,8 +165,7 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        cubeShader.setInt("material.diffuse", 0);
-        cubeShader.setInt("material.specular", 1);
+        
         
         view = ourCamera->getView();
         projection = glm::perspective(glm::radians(ourCamera->Fov), 800.0f / 600.0f, 0.1f, 100.0f);
@@ -175,6 +174,9 @@ int main() {
 
         // draw cube
         cubeShader.use();
+        cubeShader.setInt("material.diffuse", 0);
+        cubeShader.setInt("material.specular", 1);
+
         cubeShader.setVec3("light.position", lightPos);
         
         glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -204,7 +206,7 @@ int main() {
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 	
-	// draw light 
+	    // draw light 
         lightShader.use(); 
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
@@ -276,7 +278,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = (float) xpos;
     lastY = (float) ypos;
 
-    const float sensitivity = 0.5f * deltaTime;
+    const float sensitivity = 6.0f * deltaTime;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
