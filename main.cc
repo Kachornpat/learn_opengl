@@ -202,13 +202,23 @@ int main() {
         cubeShader.setVec3("dirLight.diffuse", diffuseColor);
         cubeShader.setVec3("dirLight.specular", lightColor);
 
+        // point light
+        cubeShader.setVec3("pointLights[0].position", glm::vec3(0.7f, 0.2f, 2.0f));
+
+        cubeShader.setFloat("pointLights[0].constant", 1.0f);
+        cubeShader.setFloat("pointLights[0].linear", 0.09f);
+        cubeShader.setFloat("pointLights[0].quadratic", 0.032f);
+
+        cubeShader.setVec3("pointLights[0].ambient", ambientColor);
+        cubeShader.setVec3("pointLights[0].diffuse", diffuseColor);
+        cubeShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
         // spot light
         cubeShader.setVec3("spotLight.position", ourCamera->Position);
         cubeShader.setVec3("spotLight.direction", ourCamera->Front);
         cubeShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
         cubeShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
 
-        // attenuation
         cubeShader.setFloat("spotLight.constant", 1.0f);
         cubeShader.setFloat("spotLight.linear", 0.09f);
         cubeShader.setFloat("spotLight.quadratic", 0.032f);
