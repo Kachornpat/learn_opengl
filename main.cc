@@ -185,32 +185,38 @@ int main() {
 
         // draw cube
         cubeShader.use();
+        cubeShader.setVec3("viewPos", ourCamera->Position);
 
-        // texture
+        // material
         cubeShader.setInt("material.diffuse", 0);
         cubeShader.setInt("material.specular", 1);
+        cubeShader.setFloat("material.shininess", 32.0f);
 
-        // spot light
-        cubeShader.setVec3("light.position", ourCamera->Position);
-        cubeShader.setVec3("light.direction", ourCamera->Front);
-        cubeShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-        cubeShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
-
-        // attenuation
-        cubeShader.setFloat("light.constant", 1.0f);
-        cubeShader.setFloat("light.linear", 0.09f);
-        cubeShader.setFloat("light.quadratic", 0.032f);
-        
         glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
         glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 
-        cubeShader.setVec3("light.ambient", ambientColor);
-        cubeShader.setVec3("light.diffuse", diffuseColor);
-        cubeShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        cubeShader.setVec3("viewPos", ourCamera->Position);
+        // directional light
+        cubeShader.setVec3("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+        cubeShader.setVec3("dirLight.ambient", ambientColor);
+        cubeShader.setVec3("dirLight.diffuse", diffuseColor);
+        cubeShader.setVec3("dirLight.specular", lightColor);
+
+        // spot light
+        cubeShader.setVec3("spotLight.position", ourCamera->Position);
+        cubeShader.setVec3("spotLight.direction", ourCamera->Front);
+        cubeShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        cubeShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+
+        // attenuation
+        cubeShader.setFloat("spotLight.constant", 1.0f);
+        cubeShader.setFloat("spotLight.linear", 0.09f);
+        cubeShader.setFloat("spotLight.quadratic", 0.032f);
+
+        cubeShader.setVec3("spotLight.ambient", ambientColor);
+        cubeShader.setVec3("spotLight.diffuse", diffuseColor);
+        cubeShader.setVec3("spotLight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
         
-        cubeShader.setFloat("material.shininess", 32.0f);
 
         viewLoc = glGetUniformLocation(cubeShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
