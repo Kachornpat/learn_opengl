@@ -178,8 +178,6 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        
-        
         view = ourCamera->getView();
         projection = glm::perspective(glm::radians(ourCamera->Fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
@@ -187,17 +185,21 @@ int main() {
 
         // draw cube
         cubeShader.use();
+
+        // texture
         cubeShader.setInt("material.diffuse", 0);
         cubeShader.setInt("material.specular", 1);
 
+        // spot light
         cubeShader.setVec3("light.position", ourCamera->Position);
         cubeShader.setVec3("light.direction", ourCamera->Front);
         cubeShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
         cubeShader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+
+        // attenuation
         cubeShader.setFloat("light.constant", 1.0f);
         cubeShader.setFloat("light.linear", 0.09f);
         cubeShader.setFloat("light.quadratic", 0.032f);
-        // cubeShader.setVec3("light.direction", glm::vec3(1.0f, 0.3f, 0.5f));
         
         glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
@@ -209,8 +211,6 @@ int main() {
         cubeShader.setVec3("viewPos", ourCamera->Position);
         
         cubeShader.setFloat("material.shininess", 32.0f);
-
-        
 
         viewLoc = glGetUniformLocation(cubeShader.ID, "view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -224,8 +224,12 @@ int main() {
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+            cubeShader.setMat4("normalMat", glm::transpose(glm::inverse(model)));
+
             modelLoc = glGetUniformLocation(cubeShader.ID, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
             glBindVertexArray(cubeVAO);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
