@@ -6,6 +6,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <iostream>
+
 #include "shader.hh"
 #include "mesh.hh"
 
@@ -16,9 +18,11 @@ class Model
     public:
         Model(char *path)
         {
-            loadModel(path);
+            cout << path << endl;
+            // loadModel(path);
         }
         void Draw(Shader &shader);
+        unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);
     private:
 
         vector<Mesh> meshes;

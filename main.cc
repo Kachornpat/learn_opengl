@@ -10,6 +10,7 @@
 #include "shader.hh"
 #include "camera.hh"
 #include "stb_image.h"
+#include "model.hh"
 
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -312,6 +313,9 @@ int main() {
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        char filePath[] = "backpack/backpack.obj";
+        Model model = Model(filePath);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
