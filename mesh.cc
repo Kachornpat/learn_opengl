@@ -2,8 +2,10 @@
 #include <GLFW/glfw3.h>
 
 #include <vector>
+#include <string>
 
 #include "mesh.hh"
+#include "shader.hh"
 #include <glm/glm.hpp>
 
 using namespace std;
@@ -40,5 +42,30 @@ void Mesh::setupMesh()
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
     glBindVertexArray(0);
+}
+
+void Mesh::Draw(Shader &shader)
+{
+    unsigned int diffuseNr = 1;
+    unsigned int specularNr = 1;
+    for (unsigned int i = 0; textures.size(); i++)
+    {
+        glActiveTexture(GL_TEXTURE0 + 1);
+        
+        string number;
+        string name = textures[i].type;
+        if (name == "texture_diffuse")
+            number = to_string(diffuseNr++);
+        else if (name == "texture_specular")
+            number = to_string(specularNr++);
+        
+        shader.setFloat(("material." + name + number).c_str(), i);
+        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+
+        // Drawing
+        glBindVertexArray(VAO);
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
 }
 
