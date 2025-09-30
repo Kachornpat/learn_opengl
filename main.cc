@@ -155,7 +155,7 @@ int main() {
     Shader cubeShader("shader/cubeShader.vs", "shader/cubeShader.fs");
     ourCamera = new Camera();
 
-    char filePath[] = "C:/git/assimp/test/models/OBJ/spider.obj";
+    char filePath[] = "/home/kachornpat/git/assimp/test/models/OBJ/spider.obj";
     Model modelObj = Model(filePath);
 
     glm::mat4 model, view, projection;
@@ -316,7 +316,11 @@ int main() {
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-        // cubeShader.use();
+        cubeShader.use();
+        model = glm::mat4(1.0f);
+        model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+        modelLoc = glGetUniformLocation(lightShader.ID, "model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         modelObj.Draw(cubeShader);
         glfwSwapBuffers(window);
         glfwPollEvents();

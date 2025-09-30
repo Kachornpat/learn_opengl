@@ -38,6 +38,9 @@ void Model::loadModel(string path)
 
 void Model::processNode(aiNode *node, const aiScene *scene)
 {
+    cout << "meshes: " <<  node->mNumMeshes << endl;
+    cout << "children: " <<  node->mNumChildren << endl;
+
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -122,7 +125,9 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type,
 unsigned int Model::TextureFromFile(const char *path, const string &directory, bool gamma)
 {
     string filename = string(path);
-    filename = directory + '/' + filename;
+    filename = directory + '/' + filename.substr(filename.find_last_of('\\') + 1, filename.length() - 1);
+
+    cout << filename << endl;
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
