@@ -18,8 +18,7 @@ class Model
     public:
         Model(char *path)
         {
-            cout << path << endl;
-            // loadModel(path);
+            loadModel(path);
         }
         void Draw(Shader &shader);
         unsigned int TextureFromFile(const char *path, const string &directory, bool gamma = false);

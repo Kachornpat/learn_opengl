@@ -24,7 +24,7 @@ void Model::Draw(Shader &shader)
 void Model::loadModel(string path)
 {
     Assimp::Importer import;
-    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene *scene = import.ReadFile(path.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
     {
@@ -56,7 +56,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     vector<unsigned int> indices;
     vector<Texture> textures;
 
-    for(unsigned int i = 0; i< mesh->mNumVertices; i++)
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
         glm::vec3 vector;
@@ -99,6 +99,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
     }
+
     return Mesh(vertices, indices, textures);
 }
 
