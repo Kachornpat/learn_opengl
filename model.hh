@@ -25,6 +25,7 @@ class Model
     private:
 
         vector<Mesh> meshes;
+        vector<Texture> textures_loaded;
         string directory;
         
         void loadModel(string path);

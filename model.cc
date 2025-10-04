@@ -38,9 +38,6 @@ void Model::loadModel(string path)
 
 void Model::processNode(aiNode *node, const aiScene *scene)
 {
-    cout << "meshes: " <<  node->mNumMeshes << endl;
-    cout << "children: " <<  node->mNumChildren << endl;
-
     for (unsigned int i = 0; i < node->mNumMeshes; i++)
     {
         aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -113,11 +110,27 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type,
     {
         aiString str;
         mat->GetTexture(type, i, &str);
-        Texture texture;
-        texture.id = TextureFromFile(str.C_Str(), this->directory);
-        texture.type = typeName;
-        texture.path = str.C_Str();
-        textures.push_back(texture);
+
+        bool skip = false;
+        for (unsigned int j = 0; j < textures_loaded.size(); j++)
+        {
+            if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
+            {
+                textures.push_back(textures_loaded[j]);
+                skip = true;
+                break;
+            }
+        }
+
+        if (!skip)
+        {
+            Texture texture;
+            texture.id = TextureFromFile(str.C_Str(), this->directory);
+            texture.type = typeName;
+            texture.path = str.C_Str();
+            textures.push_back(texture);
+            textures_loaded.push_back(texture);
+        }
     }
     return textures;
 }
@@ -125,9 +138,7 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type,
 unsigned int Model::TextureFromFile(const char *path, const string &directory, bool gamma)
 {
     string filename = string(path);
-    filename = directory + '/' + filename.substr(filename.find_last_of('\\') + 1, filename.length() - 1);
-
-    cout << filename << endl;
+    filename = directory + '/' + filename;
 
     unsigned int textureID;
     glGenTextures(1, &textureID);
